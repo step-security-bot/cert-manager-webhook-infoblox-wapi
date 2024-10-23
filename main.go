@@ -82,7 +82,7 @@ type customDNSProviderConfig struct {
 	SslVerify           bool                     `json:"sslVerify"           default:"false"`
 	HttpRequestTimeout  int                      `json:"httpRequestTimeout"  default:"60"`
 	HttpPoolConnections int                      `json:"httpPoolConnections" default:"10"`
-	GetUserFromVolume   bool                     `json:"bool" default:"false"`
+	GetUserFromVolume   bool                     `json:"getUserFromVolume"   default:"false"`
 }
 
 type usernamePassword struct {
