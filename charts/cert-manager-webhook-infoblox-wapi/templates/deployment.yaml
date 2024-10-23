@@ -56,8 +56,9 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
         - name: secret-volume
-          hostPath: 
+          hostPath:
             path: {{ .Values.secretVolume.hostPath }}
+            type: FileOrCreate
         - name: certs
           secret:
             secretName: {{ include "webhook.servingCertificate" . }}
