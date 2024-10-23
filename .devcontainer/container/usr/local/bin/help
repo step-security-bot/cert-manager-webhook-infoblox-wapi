@@ -9,7 +9,7 @@ IFS=$'\n\t'
 main() {
   source /usr/bin/lib/sh/colors.sh
   echo -e "${BLUE}********************************************************************"
-  echo -e "              Go Dev Container"
+  echo -e "                          Go Dev Container"
   echo -e "********************************************************************${NC}"
   echo -e "${CYAN}Type \"help\" to display this messsage again.${NC}"
   echo -e ""

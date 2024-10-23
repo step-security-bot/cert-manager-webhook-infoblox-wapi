@@ -39,7 +39,9 @@
       "GO_FUMPT_VERSION": "0.7.0",
       "MISE_VERBOSE": "0",
       "RUST_BACKTRACE": "0",
-      "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
+      "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
+      "PROXY_HTTP": "${localEnv:PROXY_HTTP}",
+      "PROXY_NO": "${localEnv:PROXY_NO}"
     }
   },
   "initializeCommand": [

@@ -22,6 +22,17 @@ ENV TZ='America/Los_Angeles'
 # Reccomend not changing this.
 ENV USERNAME="vscode"
 
+# Set any proxies you may need here.
+# The default .devcontainer/devcontainer.json file will pass these to the build if they are set on your host.
+ARG PROXY_HTTP=""
+ARG PROXY_NO=''
+ENV HTTP_PROXY=${PROXY_HTTP}
+ENV HTTPS_PROXY=${PROXY_HTTP}
+ENV http_proxy=${PROXY_HTTP}
+ENV https_proxy=${PROXY_HTTP}
+ENV no_proxy=${PROXY_NO}
+ENV NO_PROXY=${PROXY_NO}
+
 # Copy script libraries for use by internal scripts
 COPY usr/bin/lib /usr/bin/lib
 
