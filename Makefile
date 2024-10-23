@@ -2,11 +2,7 @@ OS ?= $(shell go env GOOS)
 ARCH ?= $(shell go env GOARCH)
 
 IMAGE_NAME := sarg3nt/cert-manager-webhook-infoblox-wapi
-# tag is goVersion-certMangerVersion-infobloxVersion-build_number
-# Example: go=1.21  cert-manager=1.13  infoblox-go-client=2.0
-# These values are updated in go.mod
-# Increment the buld number (last value) for each automated build for security and patch updates.
-IMAGE_TAG := 1.21-1.13-2.0-1
+IMAGE_TAG := 1.6.0
 
 OUT := $(shell pwd)/_out
 
