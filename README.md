@@ -1,6 +1,7 @@
 # Cert Manager Webhook for InfoBlox WAPI
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/badge)](https://scorecard.dev/viewer/?uri=github.com/sarg3nt/cert-manager-webhook-infoblox-wapi)
+[![CodeQL](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/github-code-scanning/codeql)
 
 An InfoBlox WAPI webhook for cert-manager.
 
