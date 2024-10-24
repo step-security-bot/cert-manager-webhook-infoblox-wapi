@@ -237,16 +237,9 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 	if cfg.GetUserFromVolume && !hasConfig {
 		hasConfig = true
-		fileInfo, err := os.Stat(SecretPath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return nil, fmt.Errorf("File %s does not exist", SecretPath)
-			}
-			return nil, err
-		}
 
-		if !fileInfo.IsDir() {
-			return nil, fmt.Errorf("File %s is not a directory", SecretPath)
+		if _, err := os.Stat(SecretPath); os.IsNotExist(err) {
+			return nil, fmt.Errorf("File %s does not exist", SecretPath)
 		}
 
 		fileData, err := os.ReadFile(SecretPath)
