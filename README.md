@@ -331,7 +331,7 @@ metadata:
 ```
 
 > **NOTE:** To use `kubernetes.io/tls-acme: "true"`, a `defaultIssuerName` must be set.  
-See: [Setting Default Issuer in Let's Encrypt](#setting-default-issuer-in-let's-encrypt)
+See: [Setting Default Issuer in Let's Encrypt](#setting-default-issuer-in-lets-encrypt)
 
 #### Setting Default Issuer in Let's Encrypt
 
