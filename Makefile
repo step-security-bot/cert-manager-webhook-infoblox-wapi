@@ -4,7 +4,7 @@ ARCH ?= $(shell $(GO) env GOARCH)
 
 IMAGE_NAME := ghcr.io/sarg3nt/cert-manager-webhook-infoblox-wapi
 IMAGE_TAG := 1.6.0
-GIT_HASH := $(shell git rev-parse --short HEAD)
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 OUT := $(shell pwd)/_out
 
@@ -30,13 +30,13 @@ clean:
 
 .PHONY: build
 build:
-	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_HASH)" .
+	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_BRANCH)" .
 
 .PHONY: push
 push: 
-	docker push "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_HASH)"
+	docker push "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_BRANCH)"
 
-.PHONY: rendered-manifest.yaml
+.PHONY: helm
 helm: $(OUT)/rendered-manifest.yaml
 
 $(OUT)/rendered-manifest.yaml: $(HELM_FILES) | $(OUT)
