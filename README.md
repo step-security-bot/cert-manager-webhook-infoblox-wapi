@@ -362,7 +362,7 @@ TEST_ZONE_NAME=example.com. make test
 
 ## Building
 
-1. If you've made any changes to `go.mod`, run `go mod tindy`
+1. If you've made any changes to `go.mod`, run `go mod tidy`
 1. Update the `Makefile` with a new `IMAGE_TAG` if necessary.
 1. Run `make build`.  A new Docker container will be generated with the `IMAGE_NAME` and `IMAGE_TAG` given in the `Makefile`
 1. Run `make push`. This will tag the version given to latest and push both images to the repo in the `IMAGE_NAME`
