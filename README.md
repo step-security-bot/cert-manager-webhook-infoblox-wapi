@@ -1,5 +1,15 @@
 # Cert Manager Webhook for InfoBlox WAPI
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/badge)](https://scorecard.dev/viewer/?uri=github.com/sarg3nt/cert-manager-webhook-infoblox-wapi)
+
+An InfoBlox WAPI webhook for cert-manager.
+
+This project provides a custom [ACME DNS01 Challenge Provider](https://cert-manager.io/docs/configuration/acme/dns01) as a webhook for [cert-manager](https://cert-manager.io/). This webhook integrates cert-manager with InfoBlox WAPI is a REST API. You can learn more about WAPI in this [PDF](https://www.infoblox.com/wp-content/uploads/infoblox-deployment-infoblox-rest-api.pdf).
+
+This implementation is based on [infoblox-go-client](https://github.com/infobloxopen/infoblox-go-client) library.
+
+This project is a fork of https://github.com/cert-manager/webhook-example.
+
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Install Cert-manager](#install-cert-manager)
@@ -24,15 +34,6 @@
 - [Contributions](#contributions)
 - [License](#license)
 - [Author](#author)
-
-
-An InfoBlox WAPI webhook for cert-manager.
-
-This project provides a custom [ACME DNS01 Challenge Provider](https://cert-manager.io/docs/configuration/acme/dns01) as a webhook for [cert-manager](https://cert-manager.io/). This webhook integrates cert-manager with InfoBlox WAPI is a REST API. You can learn more about WAPI in this [PDF](https://www.infoblox.com/wp-content/uploads/infoblox-deployment-infoblox-rest-api.pdf).
-
-This implementation is based on [infoblox-go-client](https://github.com/infobloxopen/infoblox-go-client) library.
-
-This project is a fork of https://github.com/cert-manager/webhook-example.
 
 ## Requirements
 
