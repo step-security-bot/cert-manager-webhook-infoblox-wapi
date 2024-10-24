@@ -36,8 +36,8 @@ build:
 build-container:
 	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_BRANCH)" .
 
-.PHONY: push
-push: 
+.PHONY: push-container
+push-container: 
 	docker push "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_BRANCH)"
 
 .PHONY: helm
