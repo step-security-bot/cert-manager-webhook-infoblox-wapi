@@ -3,7 +3,7 @@
 # VER=1.6.0 && IMAGE="ghcr.io/sarg3nt/cert-manager-webhook-infoblox-wapi" && docker build . -t ${IMAGE}:${VER} && docker push ${IMAGE}:${VER} && docker tag ${IMAGE}:${VER} ${IMAGE}:latest && docker push ${IMAGE}:latest
 
 # https://hub.docker.com/_/golang/
-FROM golang:1.21-alpine AS build_deps
+FROM golang:1.23-alpine3.20 AS build_deps
 
 LABEL org.opencontainers.image.source=https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi
 

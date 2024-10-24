@@ -74,6 +74,7 @@
         "mhutchie.git-graph", // Git graph
         "ms-azuretools.vscode-docker", // Docker
         "ms-kubernetes-tools.vscode-kubernetes-tools", // Kubernetes
+        "ms-vscode.makefile-tools", // Makefile support
         "redhat.vscode-yaml", // YAML
         "streetsidesoftware.code-spell-checker", // Spell checker
         "tamasfe.even-better-toml", // TOML
