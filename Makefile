@@ -30,6 +30,10 @@ clean:
 
 .PHONY: build
 build:
+	CGO_ENABLED=0 go build -o webhook -ldflags '-w -extldflags "-static"' .
+
+.PHONY: build-container
+build-container:
 	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)-$(GIT_BRANCH)" .
 
 .PHONY: push
