@@ -52,6 +52,9 @@ main() {
   log "Installing jq" "green"
   dnf install -y jq
 
+  log "Install make" "green"
+  dnf install -y make
+
   log "Installing sshpass" "green"
   dnf install -y sshpass
 
