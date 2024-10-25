@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	webhook "github.com/cert-manager/cert-manager/pkg/acme/webhook"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
@@ -38,6 +39,9 @@ func main() {
 
 	cmd.RunWebhookServer(GroupName, &customDNSProviderSolver{})
 }
+
+// Validate the customDNSProviderSolver satisfies the interface that cert manager expects.
+var _ webhook.Solver = (*customDNSProviderSolver)(nil)
 
 // customDNSProviderSolver implements the provider-specific logic needed to
 // 'present' an ACME challenge TXT record for your own DNS provider.
