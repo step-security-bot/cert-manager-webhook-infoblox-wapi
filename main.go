@@ -301,7 +301,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 	// Initialize ibclient
 	hostConfig := ibclient.HostConfig{
-		Scheme:  "https",
+		//Scheme:  "https",
 		Host:    cfg.Host,
 		Version: cfg.Version,
 		Port:    cfg.Port,
