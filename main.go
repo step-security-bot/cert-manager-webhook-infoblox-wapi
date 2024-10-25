@@ -112,7 +112,7 @@ func (c *customDNSProviderSolver) Name() string {
 // cert-manager itself will later perform a self check to ensure that the
 // solver has correctly configured the DNS provider.
 func (c *customDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Presenting DNS record")
+	logf.V(logf.InfoLevel).InfoS("CMI: Presenting DNS record")
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
 		return err
@@ -129,17 +129,18 @@ func (c *customDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
 
 	recordRef, err := c.GetTXTRecord(ib, recordName, ch.Key, cfg.View)
 	if err != nil {
-		return nil
+		logf.V(logf.ErrorLevel).InfoS("CMI: Error getting TXT record", "name", recordName, "error", err)
+		return err
 	}
 
 	if recordRef != "" {
-		logf.V(logf.InfoLevel).InfoS("CMIW: TXT record already present", "name", recordName, "ref", recordRef)
+		logf.V(logf.InfoLevel).InfoS("CMI: TXT record already present", "name", recordName, "ref", recordRef)
 	} else {
 		recordRef, err := c.CreateTXTRecord(ib, recordName, ch.Key, cfg.View)
 		if err != nil {
 			return err
 		}
-		logf.V(logf.InfoLevel).InfoS("CMIW: Created new TXT record", "name", recordName, "ref", recordRef)
+		logf.V(logf.InfoLevel).InfoS("CMI: Created new TXT record", "name", recordName, "ref", recordRef)
 	}
 
 	return nil
@@ -172,7 +173,7 @@ func (c *customDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
 	}
 
 	if recordRef == "" {
-		logf.V(logf.InfoLevel).InfoS("CMIW: TXT record not found, skipping deletion", "name", recordName, "text", ch.Key)
+		logf.V(logf.InfoLevel).InfoS("CMI: TXT record not found, skipping deletion", "name", recordName, "text", ch.Key)
 		return nil
 	}
 
@@ -180,7 +181,7 @@ func (c *customDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
 	if err != nil {
 		return err
 	}
-	logf.V(logf.InfoLevel).InfoS("CMIW: Deleted TXT record", "name", recordName, "ref", recordRef)
+	logf.V(logf.InfoLevel).InfoS("CMI: Deleted TXT record", "name", recordName, "ref", recordRef)
 
 	return nil
 }
@@ -195,10 +196,10 @@ func (c *customDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
 func (c *customDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Initializing")
+	logf.V(logf.InfoLevel).InfoS("CMI: Initializing")
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
-		logf.V(logf.ErrorLevel).InfoS("CMIW: Error initializing k8s client %v", err)
+		logf.V(logf.ErrorLevel).InfoS("CMI: Error initializing k8s client.", err)
 		return err
 	}
 
@@ -210,14 +211,15 @@ func (c *customDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stop
 // loadConfig is a small helper function that decodes JSON configuration into
 // the typed config struct.
 func loadConfig(cfgJSON *apiextensionsv1.JSON) (customDNSProviderConfig, error) {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Loading config")
+	logf.V(logf.InfoLevel).InfoS("CMI: Loading config")
+
 	cfg := customDNSProviderConfig{}
 	// handle the 'base case' where no configuration has been provided
 	if cfgJSON == nil {
 		return cfg, nil
 	}
 	if err := json.Unmarshal(cfgJSON.Raw, &cfg); err != nil {
-		return cfg, fmt.Errorf("error decoding solver config: %v", err)
+		return cfg, fmt.Errorf("CMI: Error decoding solver config: %v", err)
 	}
 
 	return cfg, nil
@@ -230,9 +232,9 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 	var username, password string
 	hasConfig := false
 
-	logf.V(logf.InfoLevel).InfoS("CMIW: Getting Infoblox User and Password")
+	logf.V(logf.InfoLevel).InfoS("CMI: Getting Infoblox User Data")
 	if cfg.UsernameSecretRef.Key != "" && cfg.PasswordSecretRef.Key != "" {
-		logf.V(logf.InfoLevel).InfoS("CMIW: Getting Infoblox User and Password from secret")
+		logf.V(logf.InfoLevel).InfoS("CMI: Getting Infoblox User and Password from secret")
 		hasConfig = true
 		var err error
 		// Find secret credentials
@@ -245,16 +247,15 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 		if err != nil {
 			return nil, err
 		}
-
-		logf.V(logf.InfoLevel).InfoS("CMIW: Infoblox User: %s", username)
+		logf.V(logf.InfoLevel).Infof("CMI: Infoblox User: %s", username)
 	}
 
 	if cfg.GetUserFromVolume && !hasConfig {
-		logf.V(logf.InfoLevel).InfoS("CMIW: Getting Infoblox User and Password from volume")
+		logf.V(logf.InfoLevel).InfoS("CMI: Getting Infoblox User and Password from volume")
 		hasConfig = true
 
 		if _, err := os.Stat(SecretPath); os.IsNotExist(err) {
-			return nil, fmt.Errorf("File %s does not exist", SecretPath)
+			return nil, fmt.Errorf("CMI: File %s does not exist", SecretPath)
 		}
 
 		fileData, err := os.ReadFile(SecretPath)
@@ -269,11 +270,11 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 		username = creds.Username
 		password = creds.Password
-		logf.V(logf.InfoLevel).InfoS("CMIW: Infoblox User: %s", username)
+		logf.V(logf.InfoLevel).Infof("CMI: Infoblox User: %s", username)
 	}
 
 	if !hasConfig {
-		return nil, fmt.Errorf("CMIW: No secretRefs or secretPath provided")
+		return nil, fmt.Errorf("CMI: No secretRefs or secretPath provided")
 	}
 
 	// Set default values if needed
@@ -301,7 +302,6 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 	// Initialize ibclient
 	hostConfig := ibclient.HostConfig{
-		//Scheme:  "https",
 		Host:    cfg.Host,
 		Version: cfg.Version,
 		Port:    cfg.Port,
@@ -319,7 +319,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 	ib, err := ibclient.NewConnector(hostConfig, authConfig, transportConfig, requestBuilder, requestor)
 	if err != nil {
-		logf.V(logf.InfoLevel).InfoS(("CMIW: Error creating Infoblox client"))
+		logf.V(logf.ErrorLevel).InfoS("CMI: Error creating Infoblox client", "error", err)
 		return nil, err
 	}
 
@@ -328,7 +328,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 // Resolve the value of a secret given a SecretKeySelector with name and key parameters
 func (c *customDNSProviderSolver) getSecret(sel cmmeta.SecretKeySelector, namespace string) (string, error) {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Getting secret")
+	logf.V(logf.InfoLevel).InfoS("CMI: Getting secret")
 	secret, err := c.client.CoreV1().Secrets(namespace).Get(context.Background(), sel.Name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
@@ -344,36 +344,40 @@ func (c *customDNSProviderSolver) getSecret(sel cmmeta.SecretKeySelector, namesp
 
 // Get the ref for TXT record in InfoBlox given its name, text and view
 func (c *customDNSProviderSolver) GetTXTRecord(ib ibclient.IBConnector, name string, text string, view string) (string, error) {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Getting TXT record")
+	logf.V(logf.InfoLevel).InfoS("CMI: Getting TXT record")
 	var records []ibclient.RecordTXT
-	recordTXT := ibclient.NewRecordTXT(view, "", name, text, 70, true, "", nil)
-	logf.V(logf.InfoLevel).InfoS("CMIW: RecordTXT: %v", recordTXT)
+	recordTXT := ibclient.NewEmptyRecordTXT()
 	params := map[string]string{
 		"name": name,
 		"text": text,
 		"view": view,
 	}
 	err := ib.GetObject(recordTXT, "", ibclient.NewQueryParams(false, params), &records)
+	logf.V(logf.InfoLevel).Infof("CMI: Number of records is: %s", strconv.Itoa(len(records)))
 
 	if len(records) > 0 {
-		logf.V(logf.InfoLevel).InfoS("CMIW: Found TXT record")
+		logf.V(logf.InfoLevel).InfoS("CMI: Found TXT record")
 		return records[0].Ref, err
 	} else {
+		if _, ok := err.(*ibclient.NotFoundError); ok {
+			logf.V(logf.TraceLevel).InfoS("CMI: No TXT record found.  This can be normal for the first run.")
+			return "", nil
+		}
 		return "", err
 	}
 }
 
 // Create a TXT record in Infoblox
 func (c *customDNSProviderSolver) CreateTXTRecord(ib ibclient.IBConnector, name string, text string, view string) (string, error) {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Creating TXT record")
-	recordTXT := ibclient.NewRecordTXT(view, "", name, text, 70, true, "", nil)
-	logf.V(logf.InfoLevel).InfoS("CMIW: RecordTXT: %v", recordTXT)
+	logf.V(logf.InfoLevel).InfoS("CMI: Creating TXT record")
+	recordTXT := ibclient.NewRecordTXT(view, "", name, text, 140, true, "", nil)
+	logf.V(logf.InfoLevel).InfoS("CMI: RecordTXT:", recordTXT)
 	return ib.CreateObject(recordTXT)
 }
 
 // Delete a TXT record in Infoblox by ref
 func (c *customDNSProviderSolver) DeleteTXTRecord(ib ibclient.IBConnector, ref string) error {
-	logf.V(logf.InfoLevel).InfoS("CMIW: Deleting TXT record")
+	logf.V(logf.InfoLevel).InfoS("CMI: Deleting TXT record")
 	_, err := ib.DeleteObject(ref)
 
 	return err
