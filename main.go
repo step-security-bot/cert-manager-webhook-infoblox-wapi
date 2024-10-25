@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -188,6 +189,7 @@ func (c *customDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
 func (c *customDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+	log.Print("Initializing cert-manager Infoblox webhook")
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
 		return err
@@ -201,6 +203,7 @@ func (c *customDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stop
 // loadConfig is a small helper function that decodes JSON configuration into
 // the typed config struct.
 func loadConfig(cfgJSON *apiextensionsv1.JSON) (customDNSProviderConfig, error) {
+	log.Print("Loading config for cert-manager Infoblox webhook")
 	cfg := customDNSProviderConfig{}
 	// handle the 'base case' where no configuration has been provided
 	if cfgJSON == nil {
@@ -220,7 +223,9 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 	var username, password string
 	hasConfig := false
 
+	log.Print("Getting Infoblox User and Password for cert-manager Infoblox webhook")
 	if cfg.UsernameSecretRef.Key != "" && cfg.PasswordSecretRef.Key != "" {
+		log.Print("Getting Infoblox User and Password from secret")
 		hasConfig = true
 		var err error
 		// Find secret credentials
@@ -233,9 +238,12 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 		if err != nil {
 			return nil, err
 		}
+
+		log.Printf("Infoblox User: %s", username)
 	}
 
 	if cfg.GetUserFromVolume && !hasConfig {
+		log.Print("Getting Infoblox User and Password from volume")
 		hasConfig = true
 
 		if _, err := os.Stat(SecretPath); os.IsNotExist(err) {
@@ -254,7 +262,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 		username = creds.Username
 		password = creds.Password
-
+		log.Printf("Infoblox User: %s", username)
 	}
 
 	if !hasConfig {
@@ -303,6 +311,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 	ib, err := ibclient.NewConnector(hostConfig, authConfig, transportConfig, requestBuilder, requestor)
 	if err != nil {
+		log.Print(("Error creating Infoblox client"))
 		return nil, err
 	}
 
@@ -311,6 +320,7 @@ func (c *customDNSProviderSolver) getIbClient(cfg *customDNSProviderConfig, name
 
 // Resolve the value of a secret given a SecretKeySelector with name and key parameters
 func (c *customDNSProviderSolver) getSecret(sel cmmeta.SecretKeySelector, namespace string) (string, error) {
+	log.Print("Getting secret for cert-manager Infoblox webhook")
 	secret, err := c.client.CoreV1().Secrets(namespace).Get(context.Background(), sel.Name, metav1.GetOptions{})
 	if err != nil {
 		return "", err
@@ -326,8 +336,10 @@ func (c *customDNSProviderSolver) getSecret(sel cmmeta.SecretKeySelector, namesp
 
 // Get the ref for TXT record in InfoBlox given its name, text and view
 func (c *customDNSProviderSolver) GetTXTRecord(ib ibclient.IBConnector, name string, text string, view string) (string, error) {
+	log.Print("Getting TXT record for cert-manager Infoblox webhook")
 	var records []ibclient.RecordTXT
-	recordTXT := ibclient.NewRecordTXT(view, "", "", "", 0, false, "", nil)
+	recordTXT := ibclient.NewRecordTXT(view, "", name, text, 70, true, "", nil)
+	log.Printf("RecordTXT: %v", recordTXT)
 	params := map[string]string{
 		"name": name,
 		"text": text,
@@ -336,6 +348,7 @@ func (c *customDNSProviderSolver) GetTXTRecord(ib ibclient.IBConnector, name str
 	err := ib.GetObject(recordTXT, "", ibclient.NewQueryParams(false, params), &records)
 
 	if len(records) > 0 {
+		log.Print("Found TXT record")
 		return records[0].Ref, err
 	} else {
 		return "", err
@@ -344,12 +357,15 @@ func (c *customDNSProviderSolver) GetTXTRecord(ib ibclient.IBConnector, name str
 
 // Create a TXT record in Infoblox
 func (c *customDNSProviderSolver) CreateTXTRecord(ib ibclient.IBConnector, name string, text string, view string) (string, error) {
+	log.Print("Creating TXT record for cert-manager Infoblox webhook")
 	recordTXT := ibclient.NewRecordTXT(view, "", name, text, 70, true, "", nil)
+	log.Printf("RecordTXT: %v", recordTXT)
 	return ib.CreateObject(recordTXT)
 }
 
 // Delete a TXT record in Infoblox by ref
 func (c *customDNSProviderSolver) DeleteTXTRecord(ib ibclient.IBConnector, ref string) error {
+	log.Print("Deleting TXT record for cert-manager Infoblox webhook")
 	_, err := ib.DeleteObject(ref)
 
 	return err
