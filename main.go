@@ -1,5 +1,6 @@
 package main
 
+// cspell:ignore cmapi cmacme
 import (
 	"context"
 	"encoding/json"
@@ -16,7 +17,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	webhook "github.com/cert-manager/cert-manager/pkg/acme/webhook"
-	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
+	whapi "github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	logf "github.com/cert-manager/cert-manager/pkg/logs"
@@ -24,6 +25,7 @@ import (
 
 const SecretPath = "/etc/secrets/creds.json"
 
+// var _ webhook.Solver = (*customDNSProviderSolver)(nil)
 var GroupName = os.Getenv("GROUP_NAME")
 
 func main() {
@@ -109,7 +111,7 @@ func (c *customDNSProviderSolver) Name() string {
 // This method should tolerate being called multiple times with the same value.
 // cert-manager itself will later perform a self check to ensure that the
 // solver has correctly configured the DNS provider.
-func (c *customDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
+func (c *customDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
 	logf.V(logf.InfoLevel).InfoS("CMIW: Presenting DNS record")
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
@@ -149,7 +151,7 @@ func (c *customDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 // value provided on the ChallengeRequest should be cleaned up.
 // This is in order to facilitate multiple DNS validations for the same domain
 // concurrently.
-func (c *customDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
+func (c *customDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
 		return err
@@ -196,6 +198,7 @@ func (c *customDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stop
 	logf.V(logf.InfoLevel).InfoS("CMIW: Initializing")
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
+		logf.V(logf.ErrorLevel).InfoS("CMIW: Error initializing k8s client %v", err)
 		return err
 	}
 
