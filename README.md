@@ -1,3 +1,4 @@
+<!--cspell:ignore mycompany dvcm Gracia sarg  -->
 # Cert Manager Webhook for InfoBlox WAPI
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/badge)](https://scorecard.dev/viewer/?uri=github.com/sarg3nt/cert-manager-webhook-infoblox-wapi)
