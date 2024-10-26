@@ -1,7 +1,9 @@
+<!--cspell:ignore mycompany dvcm Gracia sarg  -->
 # Cert Manager Webhook for InfoBlox WAPI
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/badge)](https://scorecard.dev/viewer/?uri=github.com/sarg3nt/cert-manager-webhook-infoblox-wapi)
 [![CodeQL](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/github-code-scanning/codeql)
+[![Release](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/release.yml/badge.svg)](https://github.com/sarg3nt/cert-manager-webhook-infoblox-wapi/actions/workflows/release.yml)
 
 An InfoBlox WAPI webhook for cert-manager.
 
@@ -9,7 +11,8 @@ This project provides a custom [ACME DNS01 Challenge Provider](https://cert-mana
 
 This implementation is based on [infoblox-go-client](https://github.com/infobloxopen/infoblox-go-client) library.
 
-This project is a fork of https://github.com/cert-manager/webhook-example.
+This project is a fork of https://github.com/luisico/cert-manager-webhook-infoblox-wapi, which was forked from 
+https://github.com/cert-manager/webhook-example.
 
 - [Requirements](#requirements)
 - [Installation](#installation)
