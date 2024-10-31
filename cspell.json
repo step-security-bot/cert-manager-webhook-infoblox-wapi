@@ -58,6 +58,7 @@
     "golangci",
     "golint",
     "gomnd",
+    "gomod",
     "gonum",
     "gopath",
     "gopkg",
