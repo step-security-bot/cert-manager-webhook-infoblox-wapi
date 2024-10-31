@@ -18,7 +18,7 @@ main() {
   # Name of the project folder
   local project_name="cert-manager-webhook-infoblox-wapi"
   # Name of the container
-  local container_name="${project_name}-dev"
+  local container_name="${project_name}"
   # User being created in the container
   local container_user="vscode"
 
@@ -29,20 +29,20 @@ main() {
 
   if [[ -n "$docker_exec_command" ]]; then
     # Add ${docker_exec_command} command to open the dev container to a users .bashrc file if it is not already there.
-    if ! grep -F "${docker_exec_command} ()" "${HOME}/.bashrc" > /dev/null 2>&1 && [ -f "${HOME}/.bashrc" ]; then
+    if ! grep -F "${docker_exec_command} ()" "${HOME}/.bashrc" >/dev/null 2>&1 && [ -f "${HOME}/.bashrc" ]; then
       echo -e "${docker_exec_command} (){\n\
         docker exec -it -u ${container_user} -w /workspaces/${project_name} ${container_name} zsh\n\
-      }" >> "${HOME}/.bashrc"
+      }" >>"${HOME}/.bashrc"
       echo -e "${GREEN}Created \"${docker_exec_command}\" command in your ${HOME}/.bashrc file.${NC}"
       # shellcheck source=/dev/null
       source "${HOME}/.bashrc"
     fi
 
     # Add ${docker_exec_command} command to open the dev container to a users .zshrc file if it is not already there.
-    if ! grep -F "${docker_exec_command} ()" "${HOME}/.zshrc" > /dev/null 2>&1 && [ -f "${HOME}/.zshrc" ]; then
+    if ! grep -F "${docker_exec_command} ()" "${HOME}/.zshrc" >/dev/null 2>&1 && [ -f "${HOME}/.zshrc" ]; then
       echo -e "${docker_exec_command} (){\n\
         docker exec -it -u ${container_user} -w /workspaces/${project_name} ${container_name} zsh\n\
-      }" >> "${HOME}/.zshrc"
+      }" >>"${HOME}/.zshrc"
       echo -e "${GREEN}Created \"${docker_exec_command}\" command in your ${HOME}/.zshrc file.${NC}"
       # shellcheck source=/dev/null
       source "${HOME}/.zshrc"
@@ -65,7 +65,7 @@ main() {
         code .
       else
         # Open the dev container in another shell so it doesn't hang on the command line for 45 seconds for some unknown reason.
-        (devcontainer open &) > /dev/null 2>&1
+        (devcontainer open &) >/dev/null 2>&1
       fi
     fi
 
@@ -115,9 +115,9 @@ main() {
   if [[ -n "$docker_exec_command" ]]; then
     echo -e "${BLUE}You can use the \"${docker_exec_command}\" command to exec into the dev container from another terminal.${NC}"
   fi
-  docker exec -u "${container_user}" -w /workspaces/${project_name} -it ${container_name} bash
+  docker exec -u "${container_user}" -w /workspaces/${project_name} -it ${container_name} zsh
 }
 
-if ! (return 0 2> /dev/null); then
+if ! (return 0 2>/dev/null); then
   (main "$@")
 fi
