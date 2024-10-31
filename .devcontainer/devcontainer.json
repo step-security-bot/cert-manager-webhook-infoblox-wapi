@@ -2,11 +2,11 @@
 {
   "name": "cert-manager-webhook-infoblox-wapi",
   "runArgs": [
-    "--name=cert-manager-webhook-infoblox-wapi-dev"
+    "--name=cert-manager-webhook-infoblox-wapi"
   ],
   "mounts": [
-    "source=go-dev-container-bashhistory,target=/commandhistory,type=volume",
-    "source=go-dev-container-plugins,target=/home/vscode/.vscode-server/extensions,type=volume",
+    "source=cert-manager-webhook-infoblox-wapi-bashhistory,target=/commandhistory,type=volume",
+    "source=cert-manager-webhook-infoblox-wapi-plugins,target=/home/vscode/.vscode-server/extensions,type=volume",
     ///// The following should be the same for all dev containers using this image. The post_start_command.sh relies on these.
     // Your host should have a .docker directory set up and you should be logged into any Artifactory
     // repositories you need access to in the dev container.  Logging into a repo inside the dev container will not stick.
@@ -31,19 +31,7 @@
     "WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
     "TZ": "America/Los_Angeles" // Set the timezone in the devcontainer
   },
-  "dockerFile": "container/Dockerfile",
-  "build": {
-    "args": {
-      "MISE_VERSION": "v2024.10.8",
-      "GO_DELVE_DLV_VERSION": "1.23.1",
-      "GO_FUMPT_VERSION": "0.7.0",
-      "MISE_VERBOSE": "0",
-      "RUST_BACKTRACE": "0",
-      "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
-      "PROXY_HTTP": "${localEnv:PROXY_HTTP}",
-      "PROXY_NO": "${localEnv:PROXY_NO}"
-    }
-  },
+  "image": "ghcr.io/sarg3nt/go-dev-container:latest",
   "initializeCommand": [
     ".devcontainer/initialize_command.sh"
   ],

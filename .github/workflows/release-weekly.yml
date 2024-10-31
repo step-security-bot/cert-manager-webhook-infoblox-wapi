@@ -1,0 +1,138 @@
+name: Weekly Release
+
+on:
+  schedule:
+    # If the schedule stops working, see the docs: https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
+    - cron: '0 0 * * 0' # Runs weekly at 00:00 on Sunday
+  workflow_dispatch: # Allows manual triggering
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  VERSION: ""
+  TAG_MAJOR: ""
+  TAG_MINOR: ""
+  TAG_PATCH: ""
+  TAG_LATEST: ""
+
+permissions: read-all
+
+jobs:
+  release-build-and-push:
+    name: Weekly Release Build and Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: 'Checkout Repository'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Must generate the tag version manually becuase scheduled workflows do not have access to ref: refs/tags/v1.0.0
+      - name: Get the latest tag version
+        id: get_version
+        run: |
+          latest_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Latest Version: $latest_version"
+          if [[ $latest_version =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major=${BASH_REMATCH[1]}
+            echo "Major: $major"
+            minor=${BASH_REMATCH[2]}
+            echo "Minor: $minor"
+            patch=${BASH_REMATCH[3]}
+            echo "Patch: $patch"
+            
+            new_patch=$((patch + 1))
+
+            tag_major=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${major}
+            tag_minor=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${major}.${minor}
+            tag_patch=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${major}.${minor}.${new_patch}
+            tag_latest=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+            echo "TAG_MAJOR: $tag_major"
+            echo "TAG_MAJOR=$tag_major" >> $GITHUB_ENV
+            echo "TAG_MINOR: $tag_minor"
+            echo "TAG_MINOR=$tag_minor" >> $GITHUB_ENV
+            echo "TAG_PATCH: $tag_patch"
+            echo "TAG_PATCH=$tag_patch" >> $GITHUB_ENV
+            echo "TAG_LATEST: $tag_latest"
+            echo "TAG_LATEST=$tag_latest" >> $GITHUB_ENV
+
+            new_version="v${major}.${minor}.${new_patch}"
+            echo "New Version: $new_version"
+            echo "VERSION=$new_version" >> $GITHUB_ENV
+          else
+            echo "Could not determine the latest tag version."
+            exit 1
+          fi
+
+      # Docs: https://github.com/marketplace/actions/create-release
+      - name: 'Create Release'
+        id: create_release
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
+        with:
+          body: "A Weekly release containing upgrades to system packages in the base Rocky Linux container."
+          makeLatest: true
+          prerelease: false
+          tag: ${{ env.VERSION }}
+
+ 
+      - name: Log into registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75
+        with:
+          push: true
+          tags: ${{ env.TAG_MAJOR }},${{ env.TAG_MINOR }},${{ env.TAG_PATCH }},${{ env.TAG_LATEST }}
+
+  release-helm-chart:
+    name: Weekly Release Helm Chart
+    # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
+    # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Update Helm Chart AppVersion
+        uses: lrstanley/helm-version-updater@v1.0.4
+        with:
+          check-dir: charts/
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Update Helm Chart AppVersion to ${{ env.TAG_LATEST }}"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

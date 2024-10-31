@@ -1,7 +1,0 @@
-.dockerignore
-.mise.toml
-cspell.sh
-dev.sh
-Dockerfile
-README.md
-run.sh

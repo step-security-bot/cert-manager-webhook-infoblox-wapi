@@ -3,7 +3,26 @@ set -euo pipefail
 IFS=$'\n\t'
 
 main() {
+  # Set HOME to the user's home directory if it is not set
+  : "${HOME:=$(eval echo "~${USER}")}"
+  if [[ -z "${HOME}" ]]; then
+    echo "Error: HOME environment variable is not set."
+    exit 1
+  fi
+  
+  get_latest_dev_container_version
   create_required_folders
+}
+
+#######################################
+# Get the latest version of the dev container
+# Arguments:
+#   None
+#######################################
+get_latest_dev_container_version() {
+  echo "************** Pull the latest version of the container ******************"
+  docker pull ghcr.io/sarg3nt/go-dev-container:latest
+  echo ""
 }
 
 #######################################
@@ -15,6 +34,7 @@ main() {
 #######################################
 create_required_folders() {
   echo "************** Create any required missing folders if they do not exist ******************"
+
   local directories_created=false
   if [[ ! -d "${HOME}/.docker" ]]; then
     echo "You did not have a .docker folder in your home directory, creating."
