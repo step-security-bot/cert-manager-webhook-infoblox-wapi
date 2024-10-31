@@ -78,12 +78,12 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Update Helm Chart AppVersion
-        uses: lrstanley/helm-version-updater@v1.0.4
+        uses: lrstanley/helm-version-updater@91c756dbbc1ac62747df7131c32b0fbc8788222f # v1.0.4
         with:
           check-dir: charts/
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
         with:
           commit-message: "Update Helm Chart AppVersion to latest."
 
